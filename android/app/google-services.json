@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "28194112646",
+    "project_id": "chiweewee-5aae9",
+    "storage_bucket": "chiweewee-5aae9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:28194112646:android:87b76543d193e224bf3d07",
+        "android_client_info": {
+          "package_name": "com.example.schedule2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDU0aH4dKPBSsKmWYT0-YgOo0hl1dm231U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
