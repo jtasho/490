@@ -1,64 +1,85 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-Future<List> fetchFlights() async {
-  final apiKey = '70593d0a61d1ae43b98de804420b03e3';
-  final response = await http.get(Uri.parse(
-      'http://api.aviationstack.com/v1/flights?access_key=$apiKey'
-  ));
-
-  if (response.statusCode == 200) {
-    var data = json.decode(response.body);
-    return data['data']; // Returns a list of flight data
-  } else {
-    throw Exception('Failed to load flights');
-  }
-}
-
-class FlightMap extends StatefulWidget {
+class MapPage extends StatefulWidget {
   @override
-  _FlightMapState createState() => _FlightMapState();
+  _MapPageState createState() => _MapPageState();
 }
 
-class _FlightMapState extends State<FlightMap> {
-  GoogleMapController? _controller;
-  List<Marker> _markers = [];
+class _MapPageState extends State<MapPage> {
+  GoogleMapController? mapController;
+  Set<Marker> markers = Set<Marker>();
+
+  //SFO starting map location
+  final LatLng _initialPosition = LatLng(37.619, -122.381);
 
   @override
   void initState() {
     super.initState();
-    fetchFlights().then((flights) {
-      setState(() {
-        _markers = flights.map((flight) {
-          return Marker(
-            markerId: MarkerId(flight['flight']['iata']),
-            position: LatLng(flight['live']['latitude'], flight['live']['longitude']),
-            infoWindow: InfoWindow(
-              title: flight['flight']['iata'],
-              snippet: flight['airline']['name'],
-            ),
-          );
-        }).toList();
-      });
-    });
+    fetchFlightData();
+  }
+
+  // Fetch real-time flight data from OpenSky API
+  Future<void> fetchFlightData() async {
+    final url = 'https://opensky-network.org/api/states/all';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // Extract relevant flight information
+        List flights = data['states'];
+
+        Set<Marker> flightMarkers = Set();
+
+        for (var flight in flights) {
+          // Ensure that both longitude (5) and latitude (6) are of type double and handle nulls
+          double? longitude = flight[5] != null ? (flight[5] as num).toDouble() : null;
+          double? latitude = flight[6] != null ? (flight[6] as num).toDouble() : null;
+
+          if (longitude != null && latitude != null) {
+            flightMarkers.add(
+              Marker(
+                markerId: MarkerId(flight[0].toString()), // Unique ID
+                position: LatLng(latitude, longitude),
+                infoWindow: InfoWindow(
+                  title: flight[1] ?? 'Unknown Aircraft',
+                  snippet: 'Altitude: ${flight[7]?.toString() ?? 'N/A'} meters',
+                ),
+              ),
+            );
+          }
+        }
+
+        setState(() {
+          markers = flightMarkers;
+        });
+      } else {
+        print('Failed to fetch flight data.');
+      }
+    } catch (error) {
+      print('Error fetching flight data: $error');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Real-Time Flight Map"),
+        title: Text('Live Aircraft Map'),
       ),
       body: GoogleMap(
         initialCameraPosition: CameraPosition(
-          target: LatLng(0, 0), // Start the map centered at a global position
-          zoom: 2, // Zoom level to see most of the world
+          target: _initialPosition,
+          zoom: 5.0,
         ),
-        markers: Set.from(_markers),
+        markers: markers, // Display the fetched flight markers
         onMapCreated: (GoogleMapController controller) {
-          _controller = controller;
+          mapController = controller;
         },
       ),
     );

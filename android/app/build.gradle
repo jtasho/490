@@ -30,17 +30,25 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17 // Use Java 17
-        targetCompatibility = JavaVersion.VERSION_17 // Use Java 17
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
-    kotlinOptions { // Place kotlinOptions inside the android block
-        jvmTarget = "17" // Set JVM target to 17
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    buildFeatures {
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.5.0' // Updated to a compatible version
     }
 
     defaultConfig {
         applicationId = "com.example.schedule2"
-        minSdk = flutter.minSdkVersion
+        minSdk = 21
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
@@ -51,6 +59,17 @@ android {
             signingConfig = signingConfigs.debug
         }
     }
+}
+
+dependencies {
+    implementation 'com.google.firebase:firebase-bom:32.1.1' // Adjust this version as necessary
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation "androidx.compose.ui:ui:1.5.0" // Add Compose UI dependency
+    implementation "androidx.compose.material:material:1.5.0" // Add Compose Material dependency
+    implementation "androidx.compose.ui:ui-tooling:1.5.0" // Add Compose Tooling dependency
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.0" // Ensure kotlin_version is correct
 }
 
 flutter {

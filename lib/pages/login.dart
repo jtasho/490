@@ -1,4 +1,5 @@
 import 'package:schedule2/pages/signup.dart';
+import 'package:schedule2/pages/home.dart';
 import 'package:schedule2/services/auth_service.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -152,18 +153,20 @@ Widget build(BuildContext context) {
         elevation: 0,
       ),
       onPressed: () async {
+        // Call the signin method from AuthService
         await AuthService().signin(
-            email: _emailController.text,
-            password: _passwordController.text,
-            context: context
+          email: _emailController.text,
+          password: _passwordController.text,
+          context: context,
         );
+        // No need to check for success; AuthService handles navigation
       },
       child: Text(
         "Sign In",
         style: TextStyle(
-        color: Colors.black,
-        fontWeight: FontWeight.bold,
-        fontSize: 24,
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
+          fontSize: 24,
         ),
       ),
     );

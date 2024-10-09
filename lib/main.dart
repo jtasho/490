@@ -2,20 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:schedule2/firebase_options.dart';
+import 'package:schedule2/pages/home.dart';
 import 'package:schedule2/pages/login.dart';
-import 'package:schedule2/pages/map.dart'; // Make sure this file exists
-import 'package:schedule2/pages/home.dart';  // Import your home.dart file
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // Initialize Firebase only if it hasn't been initialized already
+  /*if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }*/
 
   await requestCameraPermission();
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 Future<void> requestCameraPermission() async {
@@ -26,13 +28,13 @@ Future<void> requestCameraPermission() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key); // Declared const constructor
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flight Tracker',
-      home: Login(),
+      home: HomePage(), // Ensure this is the first screen
     );
   }
 }

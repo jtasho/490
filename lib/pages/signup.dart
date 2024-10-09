@@ -124,7 +124,7 @@ class Signup extends StatelessWidget {
   Widget _signup(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFFF9000),
+        backgroundColor: const Color.fromARGB(255, 0, 162, 255),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
         ),
