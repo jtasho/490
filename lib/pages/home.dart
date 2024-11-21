@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:schedule2/pages/map.dart';
+import 'package:schedule2/pages/schedule.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -16,15 +17,31 @@ class HomePage extends StatelessWidget {
           ),
         ),
         child: Center(
-          child: ElevatedButton(
-            onPressed: () {
-              // Navigate to the map page
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => MapPage()),
-              );
-            },
-            child: Text('To Map'),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  // Navigate to the map page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MapPage()),
+                  );
+                },
+                child: Text('To Map'),
+              ),
+              SizedBox(height: 16), // Spacing between the buttons
+              ElevatedButton(
+                onPressed: () {
+                  // Navigate to the schedule page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SchedulePage()),
+                  );
+                },
+                child: Text('To Schedule'),
+              ),
+            ],
           ),
         ),
       ),
