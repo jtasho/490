@@ -19,7 +19,7 @@ class _SchedulePageState extends State<SchedulePage> {
     fetchFlightData();
   }
 
-  // Fetch real-time flight data from OpenSky API
+  //real-time flight data from OpenSky API
   Future<void> fetchFlightData() async {
     final url = 'https://opensky-network.org/api/states/all';
 
@@ -40,7 +40,7 @@ class _SchedulePageState extends State<SchedulePage> {
     }
   }
 
-  // Filter flights based on the search query
+  //filter flights based on search
   void filterFlights(String query) {
     if (query.isEmpty) {
       setState(() {
@@ -57,7 +57,7 @@ class _SchedulePageState extends State<SchedulePage> {
     });
   }
 
-  // Convert Unix timestamp to readable date/time
+  //convert Unix timestamp to readable date/time
   String formatTimestamp(int? timestamp) {
     if (timestamp == null) return 'N/A';
     final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
@@ -94,8 +94,7 @@ class _SchedulePageState extends State<SchedulePage> {
                 final flight = filteredFlights[index];
                 final callsign = flight[1] ?? 'Unknown';
                 final originCountry = flight[2] ?? 'Unknown Country';
-                final departureTime = formatTimestamp(flight[3]);
-                final arrivalTime = formatTimestamp(flight[4]);
+                final lastContact = formatTimestamp(flight[4]);
 
                 return Card(
                   margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
@@ -103,8 +102,7 @@ class _SchedulePageState extends State<SchedulePage> {
                     title: Text('Callsign: $callsign'),
                     subtitle: Text(
                       'Origin: $originCountry\n'
-                          'Departure: $departureTime\n'
-                          'Arrival: $arrivalTime',
+                          'Last Contact: $lastContact',
                     ),
                     isThreeLine: true,
                   ),
@@ -120,4 +118,3 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 }
-
