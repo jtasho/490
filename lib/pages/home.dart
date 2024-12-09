@@ -36,7 +36,7 @@ class HomePage extends StatelessWidget {
                   // Navigate to the schedule page
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => SchedulePage()),
+                    MaterialPageRoute(builder: (context) => FlightScheduleScreen()),
                   );
                 },
                 child: Text('To Schedule'),

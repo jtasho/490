@@ -3,65 +3,76 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
-class SchedulePage extends StatefulWidget {
+class FlightScheduleScreen extends StatefulWidget {
   @override
-  _SchedulePageState createState() => _SchedulePageState();
+  _FlightScheduleScreenState createState() => _FlightScheduleScreenState();
 }
 
-class _SchedulePageState extends State<SchedulePage> {
-  TextEditingController searchController = TextEditingController();
-  List flights = [];
-  List filteredFlights = [];
+class _FlightScheduleScreenState extends State<FlightScheduleScreen> {
+  List<Map<String, dynamic>> flightSchedule = [];
+  List<Map<String, dynamic>> filteredFlights = [];
+  String searchQuery = '';
 
-  @override
-  void initState() {
-    super.initState();
-    fetchFlightData();
-  }
-
-  //real-time flight data from OpenSky API
-  Future<void> fetchFlightData() async {
-    final url = 'https://opensky-network.org/api/states/all';
+  Future<void> fetchFlightSchedule() async {
+    const apiKey = '70593d0a61d1ae43b98de804420b03e3';
+    const baseUrl = 'http://api.aviationstack.com/v1/flights';
+    final url = Uri.parse('$baseUrl?access_key=$apiKey&flight_status=active');
 
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(url);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        final flights = data['data'] ?? [];
+
         setState(() {
-          flights = data['states'] ?? [];
-          filteredFlights = flights;
+          flightSchedule = flights.map<Map<String, dynamic>>((flight) {
+            return {
+              'id': flight['flight']['iata'] ?? 'N/A',
+              'airline': flight['airline']['name'] ?? 'Unknown',
+              'departure_airport': flight['departure']['airport'] ?? 'N/A',
+              'arrival_airport': flight['arrival']['airport'] ?? 'N/A',
+              'departure_time': flight['departure']['scheduled'] ?? 'N/A',
+              'arrival_time': flight['arrival']['scheduled'] ?? 'N/A',
+              'arrival_country_iso2': flight['arrival']['country_iso2'] ?? '',
+            };
+          }).toList();
+
+          filteredFlights = List.from(flightSchedule);
         });
       } else {
-        print('Failed to fetch flight data.');
+        print('Failed to fetch flight schedule. HTTP Status: ${response.statusCode}');
       }
     } catch (error) {
-      print('Error fetching flight data: $error');
+      print('Error fetching flight schedule: $error');
     }
   }
 
-  //filter flights based on search
-  void filterFlights(String query) {
-    if (query.isEmpty) {
-      setState(() {
-        filteredFlights = flights;
-      });
-      return;
+  String formatTime(String time) {
+    if (time == 'N/A') return time;
+    try {
+      final dateTime = DateTime.parse(time);
+      return DateFormat('yyyy-MM-dd hh:mm a').format(dateTime.toLocal());
+    } catch (e) {
+      return 'Invalid Time';
     }
+  }
 
+  void filterFlights(String query) {
     setState(() {
-      filteredFlights = flights.where((flight) {
-        final callsign = flight[1]?.toString().toLowerCase() ?? '';
-        return callsign.contains(query.toLowerCase());
+      searchQuery = query.toLowerCase();
+      filteredFlights = flightSchedule.where((flight) {
+        return (flight['id'].toLowerCase().contains(searchQuery) ||
+            flight['departure_airport'].toLowerCase().contains(searchQuery) ||
+            flight['arrival_airport'].toLowerCase().contains(searchQuery));
       }).toList();
     });
   }
 
-  //convert Unix timestamp to readable date/time
-  String formatTimestamp(int? timestamp) {
-    if (timestamp == null) return 'N/A';
-    final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-    return DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
+  @override
+  void initState() {
+    super.initState();
+    fetchFlightSchedule();
   }
 
   @override
@@ -75,42 +86,39 @@ class _SchedulePageState extends State<SchedulePage> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              controller: searchController,
-              onChanged: filterFlights,
               decoration: InputDecoration(
-                labelText: 'Search Flights',
+                hintText: 'Search by flight ID or airport...',
+                border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
               ),
+              onChanged: filterFlights,
             ),
           ),
           Expanded(
-            child: filteredFlights.isNotEmpty
-                ? ListView.builder(
+            child: filteredFlights.isEmpty
+                ? Center(child: CircularProgressIndicator())
+                : ListView.builder(
               itemCount: filteredFlights.length,
               itemBuilder: (context, index) {
                 final flight = filteredFlights[index];
-                final callsign = flight[1] ?? 'Unknown';
-                final originCountry = flight[2] ?? 'Unknown Country';
-                final lastContact = formatTimestamp(flight[4]);
-
                 return Card(
-                  margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                   child: ListTile(
-                    title: Text('Callsign: $callsign'),
-                    subtitle: Text(
-                      'Origin: $originCountry\n'
-                          'Last Contact: $lastContact',
+                    title: Text('${flight['airline']}'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Flight ID: ${flight['id']}'),
+                        Text(
+                            'From: ${flight['departure_airport']} → To: ${flight['arrival_airport']}'),
+                        Text(
+                            'Departure: ${formatTime(flight['departure_time'])}'),
+                        Text(
+                            'Arrival: ${formatTime(flight['arrival_time'])}'),
+                      ],
                     ),
-                    isThreeLine: true,
                   ),
                 );
               },
-            )
-                : Center(
-              child: Text('No flights found.'),
             ),
           ),
         ],
